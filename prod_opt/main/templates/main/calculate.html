@@ -1,0 +1,42 @@
+{% extends 'main/base.html' %}
+
+{% block title %}
+Calculate
+{% endblock %}
+
+{% block content %}
+    <h1>Optimization calculation</h1>
+    <p>Products count: {{ bottles|length }} Components count: {{ components|length }}</p>
+    <table border="1">
+        <tr>
+            <th>a</th>
+            {% for bottle in bottles %}
+                <th>{{ bottle.name }}</th>
+            {% endfor %}
+        </tr>
+        {% for cost in costs %}
+        <tr>
+            <th>{{ components|get_at_index:forloop.counter0 }}</th>
+            {%for cost1 in cost %}
+                <th>{{ cost1.cost }}</th>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+        <tr>
+            <th>c</th>
+            {% for bottle in bottles %}
+                <th>{{ bottle.cost }}</th>
+            {% endfor %}
+        </tr>
+    </table>
+    <br>
+    <br>
+    <table border="1">
+        <tr><th>b</th></tr>
+        {% for limit in comp_limits %}
+            <tr><th>{{ limit.limit }}</th></tr>
+        {% endfor %}
+    </table>
+    <br>
+    <button type="button" class="btn btn-dark">Calculate</button>
+{% endblock %}
