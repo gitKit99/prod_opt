@@ -119,6 +119,19 @@ def constraint1(args):
     return outer_sum
 
 
+def recalculate_b(x):
+    global g_m
+    global g_n
+    global g_a
+    new_b = []
+    for i in range(g_m):
+        inner_sum = 0.
+        for j in range(g_n):
+            inner_sum += g_a[j][i] * x[j]
+        new_b.append(inner_sum)
+    return new_b
+
+
 def constraint2(args):
     global g_n
     global g_m
@@ -171,7 +184,7 @@ def result(request):
     print(sol)
     print("constraint1: " + str(constraint1(sol.x)))
     print("constraint2: " + str(constraint2(sol.x)))
-    x = sol.x[:g_n]
+    x = list(map(int , sol.x[:g_n]))
     y = sol.x[g_n:g_n + g_m]
     v = sol.x[g_n + 2 * g_m: g_n + 3 * g_m]
     w = sol.x[g_n + g_m: g_n + 2 * g_m]
