@@ -6,5 +6,30 @@ Result
 
 {% block content %}
     <h1>Result</h1>
-    {{ x }}
+    <h3>{{ message }}</h3>
+    {% if success %}
+        <table border="1">
+            <tr>
+                <th><b>x</b></th>
+                {% for el in x%}
+                    <th>{{ el }}</th>
+                {% endfor %}
+            </tr>
+        </table>
+        <br>
+        <div style="display: flex">
+            <table border="1">
+                <tr><th><b>v</b></th></tr>
+                {% for el in v%}
+                    <tr><th>{{ el }}</th></tr>
+                {% endfor %}
+            </table>
+            <table border="1" style="margin-left: 15px">
+                <tr><th><b>w</b></th></tr>
+                {% for el in w%}
+                    <tr><th>{{ el }}</th></tr>
+                {% endfor %}
+            </table>
+        </div>
+    {% endif %}
 {% endblock %}

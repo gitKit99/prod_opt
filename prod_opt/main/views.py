@@ -9,7 +9,6 @@ from django.template.defaulttags import register
 import numpy as np
 from scipy.optimize import minimize
 
-
 g_n = 0
 g_m = 0
 
@@ -61,21 +60,16 @@ def calculate(request):
     global g_q_tilda
     global g_q
     global g_b
-    g_n = len(list(components))
-    g_m = len(list(bottles))
+    g_n = len(list(bottles))
+    g_m = len(list(components))
 
-    bottle_i = 0
-    comp_i = 0
     g_a.clear()
-    g_a = [None] * g_n
-    g_a[bottle_i] = []
-    for comp_cost in component_costs:
-        g_a[bottle_i].append(comp_cost.cost)
-        comp_i = comp_i + 1
-        if (comp_i >= g_n):
-            comp_i = 0
-            bottle_i = bottle_i + 1
-            g_a[bottle_i] = []
+    g_a = []
+    for j in range(g_n):
+        inner = []
+        for i in range(g_m):
+            inner.append(component_costs[j * g_m + i].cost)
+        g_a.append(inner)
 
     g_q.clear()
     g_q_tilda.clear()
@@ -87,62 +81,102 @@ def calculate(request):
     g_p.clear()
     for i, bottle in enumerate(bottles):
         g_c.append(bottle.cost)
-        mult_sum = 0
+        mult_sum = 0.
         for j, el in enumerate(g_a[i]):
             mult_sum += el * g_q[j]
-        g_p.append(2 * (mult_sum + g_c[i]))
+        g_p.append(2. * (mult_sum + g_c[i]))
 
     g_b.clear()
     for limit in component_limits:
         g_b.append(limit.limit)
 
+    print("g_p size: " + str(len(g_p)))
+    print("g_c size: " + str(len(g_c)))
+    print("g_q size: " + str(len(g_q)))
+    print("g_q_tilda size: " + str(len(g_q_tilda)))
     costs = []
     for i in range(len(components)):
-        inner = list(ComponentCost.objects.filter(component=i+1).order_by('id'))
+        inner = list(ComponentCost.objects.filter(component=i + 1).order_by('id'))
         costs.append(inner)
     return render(request, 'main/calculate.html', {'components': list(components), 'comp_costs': list(component_costs),
-                                               'comp_limits': list(component_limits), 'bottles': list(bottles),
+                                                   'comp_limits': list(component_limits), 'bottles': list(bottles),
                                                    'costs': list(costs)})
+
+
+def constraint1(args):
+    global g_n
+    global g_m
+    global g_a
+    global g_b
+    x = args[:g_n]
+    outer_sum = 0.
+    for i in range(g_m):
+        inner_sum = 0.
+        for j in range(g_n):
+            inner_sum += g_a[j][i] * x[j]
+        inner_sum -= g_b[i]
+        outer_sum += inner_sum
+    return outer_sum
+
+
+def constraint2(args):
+    global g_n
+    global g_m
+    global g_b
+    y = args[g_n:g_n + g_m]
+    w = args[g_n + g_m: g_n + 2 * g_m]
+    v = args[g_n + 2 * g_m: g_n + 3 * g_m]
+    res = 0.
+    for i in range(g_m):
+        res += g_b[i] + v[i] - y[i] - w[i]
+    return res
 
 
 def result(request):
     x_bounds = []
+    bounds = ()
     for bottle in Bottle.objects.all():
-        x_bounds.append(bottle.xMin)
-        x_bounds.append(bottle.xMax)
+        inner_tuple = (float(bottle.xMin), float(bottle.xMax))
+        x_bounds.append(inner_tuple)
     bounds = tuple(x_bounds)
 
     y_bounds = []
     for comp in Component.objects.all():
-        x_bounds.append(comp.yMin)
-        x_bounds.append(comp.yMax)
+        inner_tuple = (comp.yMin, comp.yMax)
+        y_bounds.append(inner_tuple)
     bounds += tuple(y_bounds)
-
-    v_bounds = []
-    for comp in Component.objects.all():
-        x_bounds.append(comp.vMin)
-        x_bounds.append(comp.vMax)
-    bounds += tuple(v_bounds)
 
     w_bounds = []
     for comp in Component.objects.all():
-        x_bounds.append(comp.wMin)
-        x_bounds.append(comp.wMax)
+        inner_tuple = (comp.wMin, comp.wMax)
+        w_bounds.append(inner_tuple)
     bounds += tuple(w_bounds)
 
-    con1 = {'type': 'eq', 'func': constraint1}
-    con2 = {'type': 'eq', 'func': constraint2}
+    v_bounds = []
+    for comp in Component.objects.all():
+        inner_tuple = (comp.vMin, comp.vMax)
+        v_bounds.append(inner_tuple)
+    bounds += tuple(v_bounds)
+
+    con1 = {'type': 'eq', 'fun': constraint1}
+    con2 = {'type': 'eq', 'fun': constraint2}
     cons = [con1, con2]
 
     global g_n
     global g_m
-    args0 = np.zeros(g_n + 3 * g_m)
-    sol = minimize(objective, args0, method='SLSQP', bounds=bounds, constraints=cons)
-    x = sol[:g_n]
-    y = sol[g_n:g_n + g_m]
-    v = sol[g_n + 2 * g_m: g_n + 3 * g_m]
-    w = sol[g_n + g_m: g_n + 2 * g_m]
-    return render(request, 'main/result.html', {'x': x, 'y': y, 'v': v, 'w': w})
+    args0 = np.zeros(g_n + 3 * g_m, dtype=float)
+    print("Length of bounds: " + str(len(bounds)))
+    # print(g_b)
+    sol = minimize(objective, args0, method='SLSQP', bounds=bounds, constraints=cons, tol=1.e-5)
+    print(sol)
+    print("constraint1: " + str(constraint1(sol.x)))
+    print("constraint2: " + str(constraint2(sol.x)))
+    x = sol.x[:g_n]
+    y = sol.x[g_n:g_n + g_m]
+    v = sol.x[g_n + 2 * g_m: g_n + 3 * g_m]
+    w = sol.x[g_n + g_m: g_n + 2 * g_m]
+    return render(request, 'main/result.html',
+                  {'z': -sol.fun, 'message': sol.message, 'success': sol.success, 'x': x, 'y': y, 'v': v, 'w': w})
 
 
 @register.filter
@@ -165,62 +199,12 @@ def objective(args, sign=-1):
     x = args[:g_n]
     y = args[g_n:g_n + g_m]
     w = args[g_n + g_m: g_n + 2 * g_m]
-    #p = args[g_n + 3 * g_m: 2 * g_n + 3 * g_n]
-    #c = args[2 * g_n + 3 * g_m: 3 * g_n + 3 * g_n]
-    #q_tilda = args[3 * g_n + 3 * g_m: 3 * g_n + 4 * g_n]
-    #q = args[3 * g_n + 4 * g_m: 3 * g_n + 5 * g_n]
-    return sign * (np.sum((g_p - g_c) * x) + np.sum(g_q_tilda * w) - np.sum(g_q * y))
-
-
-def constraint1(args):
-    global g_n
-    global g_m
-    global g_a
-    x = args[:g_n]
-    #y = args[g_n:g_n + g_m]
-    outer_sum = 0.
+    sum1 = 0.
+    for j in range(g_n):
+        sum1 += (g_p[j] - g_c[j]) * x[j]
+    sum2 = 0.
+    sum3 = 0.
     for i in range(g_m):
-        inner_sum = 0.
-        for j in range(g_n):
-            inner_sum += g_a[j][i] * x[i]
-        outer_sum += inner_sum
-    return outer_sum
-
-
-def constraint2(args):
-    global g_n
-    global g_m
-    global g_b
-    x = args[:g_n]
-    y = args[g_n:g_n + g_m]
-    w = args[g_n + g_m: g_n + 2 * g_m]
-    v = args[g_n + 2 * g_m: g_n + 3 * g_m]
-    return np.sum(g_b + v - y - w)
-
-
-# def x_constraint(x_min, x, x_max):
-#     for x_el in x:
-#         if x_el < x_min or x_el > x_max:
-#             return False
-#     return True
-#
-#
-# def y_constraint(y_min, y, y_max):
-#     for y_el in y:
-#         if y_el < y_min or y_el > y_max:
-#             return False
-#     return True
-#
-#
-# def v_constraint(v_min, v, v_max):
-#     for v_el in v:
-#         if v_el < v_min or v_el > v_max:
-#             return False
-#     return True
-#
-#
-# def w_constraint(w_min, w, w_max):
-#     for w_el in w:
-#         if w_el < w_min or w_el > w_max:
-#             return False
-#     return True
+        sum2 += g_q[i] * w[i]
+        sum3 += g_q[i] * y[i]
+    return sign * (sum1 + sum2 - sum3)
