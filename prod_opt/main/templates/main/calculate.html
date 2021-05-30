@@ -5,38 +5,42 @@ Calculate
 {% endblock %}
 
 {% block content %}
-    <h1>Optimization calculation</h1>
-    <p>Products count: {{ bottles|length }} Components count: {{ components|length }}</p>
-    <table border="1">
-        <tr>
-            <th>a</th>
+    <h1 class="display-4 text-center" style="margin: 20px; font-family: Times New Roman;" >Optimization calculation</h1>
+    <p style="font-family: Times New Roman; font-size:20px" >Products count: {{ bottles|length }} Components count: {{ components|length }}</p>
+<div class="row">
+     <div class="col-sm-8">
+    <table border="1" class="table table-dark"  >
+        <tr class="text-center">
+            <th  >a</th>
             {% for bottle in bottles %}
                 <th>{{ bottle.name }}</th>
             {% endfor %}
         </tr>
         {% for cost in costs %}
-        <tr>
+        <tr class="text-center">
             <th>{{ components|get_at_index:forloop.counter0 }}</th>
             {%for cost1 in cost %}
                 <th>{{ cost1.cost }}</th>
             {% endfor %}
         </tr>
         {% endfor %}
-        <tr>
+        <tr class="text-center table-primary" style="color: #424949 ">
             <th>c</th>
             {% for bottle in bottles %}
                 <th>{{ bottle.cost }}</th>
             {% endfor %}
         </tr>
     </table>
-    <br>
-    <br>
-    <table border="1">
-        <tr><th>b</th></tr>
+         </div>
+    <div class="col-sm-4">
+    <table border="1" style="width:30%"  class="table table-dark" >
+        <tr class="text-center"><th>b</th></tr>
         {% for limit in comp_limits %}
-            <tr><th>{{ limit.limit }}</th></tr>
+            <tr class="text-center"><th>{{ limit.limit }}</th></tr>
         {% endfor %}
     </table>
+</div>
+</div>
     <br>
-    <button type="button" class="btn btn-dark">Calculate</button>
+    <button type="button" class="btn btn-dark btn-lg " onclick="window.location.href='{% url 'result' %}'">Calculate</button>
 {% endblock %}

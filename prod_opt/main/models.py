@@ -53,3 +53,34 @@ class ComponentLimit(models.Model):
 
     def __str__(self):
         return str(self.component) + " - " + str(self.limit)
+
+
+class Result(models.Model):
+    date = models.DateTimeField('recording_time')
+
+
+class X(models.Model):
+    result = models.ForeignKey(Result, on_delete=models.CASCADE)
+    bottle = models.ForeignKey(Bottle, on_delete=models.CASCADE)
+    value = models.IntegerField()
+
+    def __str__(self):
+        return str(self.result) + " - " + str(self.bottle) + " - " + str(self.value)
+
+
+class V(models.Model):
+    result = models.ForeignKey(Result, on_delete=models.CASCADE)
+    component = models.ForeignKey(Component, on_delete=models.CASCADE)
+    value = models.FloatField()
+
+    def __str__(self):
+        return str(self.result) + " - " + str(self.component) + " - " + str(self.value)
+
+
+class W(models.Model):
+    result = models.ForeignKey(Result, on_delete=models.CASCADE)
+    component = models.ForeignKey(Component, on_delete=models.CASCADE)
+    value = models.FloatField()
+
+    def __str__(self):
+        return str(self.result) + " - " + str(self.component) + " - " + str(self.value)

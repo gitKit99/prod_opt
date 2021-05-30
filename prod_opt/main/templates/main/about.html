@@ -5,6 +5,17 @@ A page about us
 {% endblock %}
 
 {% block content %}
-    <h1>A page about us</h1>
-    <p>About us</p>
+   <h1 xmlns="http://www.w3.org/1999/html" class="display-4 text-center" style="margin: 20px; font-family: Times New Roman;">Add bottle</h1>
+
+    <form method="post">
+        {% csrf_token %}
+        Bottle name:{{ form.name }}<br>
+        Price(c):{{ form.cost }}<br>
+        xMin: {{ form.xMin }}<br>
+        xMax: {{ form.xMax }}<br>
+
+        <button type="submit" class="btn btn-dark btn-lg">Add</button>
+        <span>{{ error }}</span>
+    </form>
+
 {% endblock %}
