@@ -118,10 +118,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
 STATIC_URL = '/static/'
-MEDIA_URL = '/home/mikhaela/PycharmProjects/prod_opt/prod_opt/main/templates/main/'
+MEDIA_URL = '/home/stepan/Documents/university/process_modeling/project/prod_opt/main/templates/main/'
 
 STATICFILES_DIRS =[
-    os.path.join(BASE_DIR, '/home/mikhaela/PycharmProjects/prod_opt/prod_opt/main/templates/main/')
+    os.path.join(BASE_DIR, '/home/stepan/Documents/university/process_modeling/project/prod_opt/main/templates/main/')
 ]
 
 # Default primary key field type

@@ -8,6 +8,7 @@ from .forms import BottleForm, InForm, CompForm
 from django.template.defaulttags import register
 import numpy as np
 from scipy.optimize import minimize
+from django.views.decorators.csrf import csrf_protect
 
 g_n = 0
 g_m = 0
@@ -187,11 +188,6 @@ def constraint2(args):
     return res
 
 
-def save_result(z, x, v, w, new_b):
-    print('got: z = ' + str(z))
-    print(x)
-
-
 def result(request):
     x_bounds = []
     bounds = ()
@@ -257,6 +253,12 @@ def get_range(value):
 @register.filter
 def get_at_index(li, i):
     return li[i]
+
+
+@csrf_protect
+def save_result(request):
+    print("received z = " + request.POST['z'])
+    return HttpResponse(request.POST['text'])
 
 
 def objective(args, sign=-1):

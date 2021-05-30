@@ -5,11 +5,11 @@ Result
 {% endblock %}
 
 {% block content %}
-    <h1>Result</h1>
+    <h1 class="display-4 text-center" style="margin: 20px; font-family: Times New Roman;" >Result</h1>
     <h3>{{ message }}</h3>
     <h4>z = {{ z }}</h4>
     {% if success %}
-        <table border="1">
+        <table border="1" class="table table-dark">
             <tr>
                 <th><b>x</b></th>
                 {% for el in x%}
@@ -19,33 +19,32 @@ Result
         </table>
         <br>
         <div style="display: flex">
-            <table border="1">
-                <tr><th><b>y</b></th></tr>
+            <table border="1" class="table table-dark">
+                <tr class="text-center"><th><b>y</b></th></tr>
                 {% for el in y%}
-                    <tr><th>{{ el }}</th></tr>
+                    <tr class="text-center"><th>{{ el }}</th></tr>
                 {% endfor %}
             </table>
-            <table border="1" style="margin-left: 15px">
-                <tr><th><b>v</b></th></tr>
+            <table border="1" style="margin-left: 15px" class="table table-dark">
+                <tr class="text-center"><th><b>v</b></th></tr>
                 {% for el in v%}
-                    <tr><th>{{ el }}</th></tr>
+                    <tr class="text-center"><th>{{ el }}</th></tr>
                 {% endfor %}
             </table>
-            <table border="1" style="margin-left: 15px">
-                <tr><th><b>w</b></th></tr>
+            <table border="1" style="margin-left: 15px" class="table table-dark">
+                <tr class="text-center"><th><b>w</b></th></tr>
                 {% for el in w%}
-                    <tr><th>{{ el }}</th></tr>
+                    <tr class="text-center"><th>{{ el }}</th></tr>
                 {% endfor %}
+            </table>
+            <table border="1" style="margin-left: 15px" class="table table-dark">
+                    <tr class="text-center"><th><b>Reminder in storage (b)</b></th></tr>
+                    {% for el in rem%}
+                        <tr class="text-center"><th>{{ el }}</th></tr>
+                    {% endfor %}
             </table>
         </div>
         <br>
-        <table border="1">
-                <tr><th><b>Reminder in storage (b)</b></th></tr>
-                {% for el in rem%}
-                    <tr><th>{{ el }}</th></tr>
-                {% endfor %}
-        </table>
-        <br>
-        <button type="button" class="btn btn-dark">Save the result</button>
     {% endif %}
+    <a href="{% url 'home' %}"><h6><u>Back to the main page</u></h6></a>
 {% endblock %}
