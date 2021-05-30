@@ -1,0 +1,13 @@
+{% extends 'main/base.html' %}
+
+{% block title %}
+What would you like to add?
+{% endblock %}
+
+
+{% block content %}
+<h1 class="display-4 text-center" style="margin: 20px; font-family: Times New Roman;" >What would you like to add?</h1>
+  <a class="btn btn-secondary float-start" style=" margin: 50px; display: block; margin-left: auto; margin-right: auto; height: 50px; font-size: 22px; " href="{% url 'about' %}">Add bottle</a>
+  <a class="btn btn-secondary float-start" style=" margin: 50px; display: block; margin-left: auto; margin-right: auto; height: 50px; font-size: 22px;" href="{% url 'add_in' %}">Add ingredient</a>
+  <a class="btn btn-secondary float-start" style=" margin: 50px; display: block; margin-left: auto; margin-right: auto; height: 50px; font-size: 22px;" href="{% url 'comp' %}">Add together</a>
+{% endblock %}
