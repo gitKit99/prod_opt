@@ -7,6 +7,7 @@ Result
 {% block content %}
     <h1>Result</h1>
     <h3>{{ message }}</h3>
+    <h4>z = {{ z }}</h4>
     {% if success %}
         <table border="1">
             <tr>
@@ -19,6 +20,12 @@ Result
         <br>
         <div style="display: flex">
             <table border="1">
+                <tr><th><b>y</b></th></tr>
+                {% for el in y%}
+                    <tr><th>{{ el }}</th></tr>
+                {% endfor %}
+            </table>
+            <table border="1" style="margin-left: 15px">
                 <tr><th><b>v</b></th></tr>
                 {% for el in v%}
                     <tr><th>{{ el }}</th></tr>
@@ -31,5 +38,14 @@ Result
                 {% endfor %}
             </table>
         </div>
+        <br>
+        <table border="1">
+                <tr><th><b>Reminder in storage (b)</b></th></tr>
+                {% for el in rem%}
+                    <tr><th>{{ el }}</th></tr>
+                {% endfor %}
+        </table>
+        <br>
+        <button type="button" class="btn btn-dark">Save the result</button>
     {% endif %}
 {% endblock %}

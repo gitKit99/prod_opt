@@ -1,3 +1,5 @@
+import math
+
 from django.shortcuts import render, redirect
 from .models import Task
 from .models import Component
@@ -108,27 +110,29 @@ def constraint1(args):
     global g_m
     global g_a
     global g_b
+    res = []
     x = args[:g_n]
-    outer_sum = 0.
+    y = args[g_n: g_n + g_m]
     for i in range(g_m):
         inner_sum = 0.
         for j in range(g_n):
             inner_sum += g_a[j][i] * x[j]
-        inner_sum -= g_b[i]
-        outer_sum += inner_sum
-    return outer_sum
+        inner_sum -= y[i]
+        res.append(inner_sum)
+    return res
 
 
-def recalculate_b(x):
+def calculate_reminder(args):
     global g_m
     global g_n
     global g_a
+    global g_b
+    y = args[g_n: g_n + g_m]
+    w = args[g_n + g_m: g_n + 2 * g_m]
+    v = args[g_n + 2 * g_m: g_n + 3 * g_m]
     new_b = []
     for i in range(g_m):
-        inner_sum = 0.
-        for j in range(g_n):
-            inner_sum += g_a[j][i] * x[j]
-        new_b.append(inner_sum)
+        new_b.append(g_b[i] + v[i] - y[i] - w[i])
     return new_b
 
 
@@ -139,10 +143,15 @@ def constraint2(args):
     y = args[g_n:g_n + g_m]
     w = args[g_n + g_m: g_n + 2 * g_m]
     v = args[g_n + 2 * g_m: g_n + 3 * g_m]
-    res = 0.
+    res = []
     for i in range(g_m):
-        res += g_b[i] + v[i] - y[i] - w[i]
+        res.append(g_b[i] + v[i] - y[i] - w[i])
     return res
+
+
+def save_result(z, x, v, w, new_b):
+    print('got: z = ' + str(z))
+    print(x)
 
 
 def result(request):
@@ -184,12 +193,22 @@ def result(request):
     print(sol)
     print("constraint1: " + str(constraint1(sol.x)))
     print("constraint2: " + str(constraint2(sol.x)))
-    x = list(map(int , sol.x[:g_n]))
-    y = sol.x[g_n:g_n + g_m]
-    v = sol.x[g_n + 2 * g_m: g_n + 3 * g_m]
-    w = sol.x[g_n + g_m: g_n + 2 * g_m]
+    args = sol.x
+    for x_index in range(g_n):
+        args[x_index] = int(args[x_index])
+    x = args[: g_n]
+    for i in range(g_m):
+        inner_sum = 0.
+        for j in range(g_n):
+            inner_sum += g_a[j][i] * x[j]
+        args[g_n + i] = inner_sum
+    y = args[g_n:g_n + g_m]
+    v = args[g_n + 2 * g_m: g_n + 3 * g_m]
+    w = args[g_n + g_m: g_n + 2 * g_m]
+    reminder = calculate_reminder(args)
     return render(request, 'main/result.html',
-                  {'z': -sol.fun, 'message': sol.message, 'success': sol.success, 'x': x, 'y': y, 'v': v, 'w': w})
+                  {'z': -sol.fun, 'message': sol.message, 'success': sol.success, 'x': x, 'y': y, 'v': v, 'w': w,
+                   'rem': reminder})
 
 
 @register.filter
